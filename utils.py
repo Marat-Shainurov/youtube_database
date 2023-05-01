@@ -46,7 +46,7 @@ def create_database(db_name: str, params: dict) -> None:
             CREATE TABLE channels
             (
             channel_id SERIAL PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
+            title VARCHAR NOT NULL,
             views INTEGER,
             subscribers INTEGER,
             videos INTEGER,
@@ -71,3 +71,33 @@ def create_database(db_name: str, params: dict) -> None:
 
 def save_data_to_database(data: list[dict[str, Any]], db_name: str, params: dict) -> None:
     """Saves data to the database"""
+
+    conn = psycopg2.connect(dbname=db_name, **params)
+
+    with conn.cursor() as cur:
+        for channel in data:
+            channel_data = channel['channel']['snippet']
+            channel_stats = channel['channel']['statistics']
+            cur.execute(
+                """
+                INSERT INTO channels (title, views, subscribers, videos, channel_url)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING channel_id
+                """,
+                (channel_data['title'], channel_stats['viewCount'], channel_stats['subscriberCount'],
+                 channel_stats['videoCount'], f"https://www.youtube.com/channel/{channel['channel']['id']}")
+            )
+            channel_id = cur.fetchone()
+            videos_data = channel['videos']
+            for video in videos_data:
+                video_data = video['videos']
+                cur.execute(
+                    """
+                    INSERT INTO videos (channel_id, title, publish_date, video_url)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (channel_id, video_data['title'], video_data['publishedAt'],
+                     f"https://www.youtube.com/watch?v={video['id']['videoId']}")
+                )
+    conn.commit()
+    conn.close()
