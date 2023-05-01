@@ -1,8 +1,5 @@
 import os
 from config import config
-import google.auth
-from googleapiclient.discovery import build
-
 
 from utils import get_youtube_data, create_database, save_data_to_database
 
@@ -18,9 +15,9 @@ def main():
         # "UCJ0uqCI0Vqr2Rrt1HseGirg",  # "@TheLateLateShow"
     ]
 
-    data = get_youtube_data(api_key, channel_ids)
+    # data = get_youtube_data(api_key, channel_ids)
     params = config()
-    # create_database('YouTube_DB', params)
+    create_database('youtube_db', params)
     # save_data_to_database(data, 'YouTube_DB', params)
 
 if __name__ == '__main__':
