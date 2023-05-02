@@ -47,7 +47,7 @@ def create_database(db_name: str, params: dict) -> None:
             (
             channel_id SERIAL PRIMARY KEY,
             title VARCHAR NOT NULL,
-            views INTEGER,
+            views BIGINT,
             subscribers INTEGER,
             videos INTEGER,
             channel_url TEXT
@@ -90,7 +90,7 @@ def save_data_to_database(data: list[dict[str, Any]], db_name: str, params: dict
             channel_id = cur.fetchone()
             videos_data = channel['videos']
             for video in videos_data:
-                video_data = video['videos']
+                video_data = video['snippet']
                 cur.execute(
                     """
                     INSERT INTO videos (channel_id, title, publish_date, video_url)
